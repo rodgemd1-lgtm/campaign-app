@@ -3,6 +3,9 @@
   "regions": ["iad1"],
   "env": {
     "OPENROUTER_API_KEY": "@openrouter-api-key",
-    "NEXT_PUBLIC_APP_URL": "https://campaign-app.vercel.app"
+    "STRIPE_SECRET_KEY": "@stripe-secret-key",
+    "NEXT_PUBLIC_APP_URL": "https://campaign-app.vercel.app",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://zqsdadnnpgqhehqxplio.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key"
   }
 }
