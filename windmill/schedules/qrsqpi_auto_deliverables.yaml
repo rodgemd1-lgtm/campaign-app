@@ -1,0 +1,31 @@
+# Windmill Schedule: Auto-generate deliverables after QRSQPI scoring completes
+#
+# This schedule watches for completed QRSQPI sessions and triggers
+# the deliverable generation pipeline automatically.
+#
+# SETUP:
+# 1. Start Windmill: docker compose up -d (port 8000)
+# 2. Login as admin@windmill.dev / changeme
+# 3. Create the flow from qrsqpi_generate_deliverables.yaml
+# 4. Create this schedule with the flow
+
+summary: "Auto-generate deliverables when QRSQPI session completes"
+description: |
+  Polls for completed QRSQPI scoring sessions and triggers
+  the deliverable generation pipeline. Runs every 5 minutes.
+
+schedule: "0 */5 * * * *"  # Every 5 minutes (6-field cron: seconds first!)
+timezone: "UTC"
+enabled: true
+
+# The flow to trigger - must be created first
+flow_path: "f/qrsqpi/generate_deliverables"
+
+# Schedule input - the session check script determines which sessions need processing
+input_transforms:
+  session_id:
+    type: javascript
+    value: |
+      // In production, query your database for pending sessions
+      // For now, this is a placeholder
+      return "latest_pending_session";

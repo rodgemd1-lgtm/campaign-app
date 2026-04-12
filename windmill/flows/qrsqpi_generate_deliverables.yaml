@@ -1,0 +1,152 @@
+# Windmill Flow: QRSQPI Generate All Deliverables
+# Generates resume (DOCX + PDF), cover letters, job matches, LinkedIn text, and Monte Carlo report
+#
+# IMPORTANT WINDMILL FORMAT NOTES:
+# - modules must be ARRAY (not object/map)
+# - input_transforms: use "javascript" type for dynamic expressions (NOT "frontend")
+# - 6-field cron for schedules (seconds first)
+
+summary: "QRSQPI deliverable generation pipeline - creates all campaign assets from scored resume data"
+description: |
+  Full deliverable generation pipeline for the QRSQPI process.
+  Takes a scored resume session and produces:
+  1. Optimized Resume (DOCX)
+  2. Optimized Resume (PDF)
+  3. Cover Letters per target role (DOCX)
+  4. Top 30 Job Matches (XLSX)
+  5. LinkedIn Profile Text
+  6. Monte Carlo Probability Report (PDF)
+
+value:
+  modules:
+    # Step 1: Fetch session data from QRSQPI results store
+    - id: fetch_session
+      summary: "Fetch QRSQPI session data"
+      value:
+        type: script
+        path: f/qrsqpi/fetch_session
+        input_transforms:
+          session_id:
+            type: javascript
+            value: "return flow_input.session_id;"
+
+    # Step 2: Generate optimized resume as DOCX
+    - id: generate_resume_docx
+      summary: "Generate optimized resume in Word format"
+      value:
+        type: script
+        path: f/qrsqpi/generate_resume_docx
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+          template_path:
+            type: static
+            value: "templates/resume_template.docx"
+
+    # Step 3: Generate optimized resume as PDF
+    - id: generate_resume_pdf
+      summary: "Generate optimized resume in PDF format"
+      value:
+        type: script
+        path: f/qrsqpi/generate_resume_pdf
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+          docx_content:
+            type: javascript
+            value: "return flow_input.generate_resume_docx.result;"
+
+    # Step 4: Generate cover letters for each target role
+    - id: generate_cover_letters
+      summary: "Generate tailored cover letters per target role"
+      value:
+        type: script
+        path: f/qrsqpi/generate_cover_letters
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+          target_roles:
+            type: javascript
+            value: "return flow_input.fetch_session.result.target_roles || [];"
+
+    # Step 5: Generate top 30 job matches spreadsheet
+    - id: generate_job_matches
+      summary: "Generate Excel spreadsheet with top 30 job matches"
+      value:
+        type: script
+        path: f/qrsqpi/generate_job_matches
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+          keywords:
+            type: javascript
+            value: "return flow_input.fetch_session.result.baseScore?.keywords || [];"
+          max_results:
+            type: static
+            value: 30
+
+    # Step 6: Generate LinkedIn profile text
+    - id: generate_linkedin
+      summary: "Generate optimized LinkedIn profile text"
+      value:
+        type: script
+        path: f/qrsqpi/generate_linkedin_profile
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+
+    # Step 7: Generate Monte Carlo probability report as PDF
+    - id: generate_monte_carlo_report
+      summary: "Generate Monte Carlo probability report PDF"
+      value:
+        type: script
+        path: f/qrsqpi/generate_monte_carlo_pdf
+        input_transforms:
+          session_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result;"
+          monte_carlo_data:
+            type: javascript
+            value: "return flow_input.fetch_session.result.monteCarlo;"
+
+    # Step 8: Package all deliverables and update session status
+    - id: finalize_deliverables
+      summary: "Package deliverables and update session status"
+      value:
+        type: script
+        path: f/qrsqpi/finalize_deliverables
+        input_transforms:
+          session_id:
+            type: javascript
+            value: "return flow_input.session_id;"
+          resume_docx:
+            type: javascript
+            value: "return flow_input.generate_resume_docx.result;"
+          resume_pdf:
+            type: javascript
+            value: "return flow_input.generate_resume_pdf.result;"
+          cover_letters:
+            type: javascript
+            value: "return flow_input.generate_cover_letters.result;"
+          job_matches:
+            type: javascript
+            value: "return flow_input.generate_job_matches.result;"
+          linkedin_text:
+            type: javascript
+            value: "return flow_input.generate_linkedin.result;"
+          monte_carlo_pdf:
+            type: javascript
+            value: "return flow_input.generate_monte_carlo_report.result;"
+
+schema:
+  properties:
+    session_id:
+      type: string
+      description: "QRSQPI session ID to generate deliverables for"
+  required:
+    - session_id
