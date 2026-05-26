@@ -170,3 +170,49 @@ README applied from the central RIG blueprint.
 - Blueprint source: `https://github.com/rodgemd1-lgtm/Startup-Intelligence-OS/blob/claude/rig-sovereign-audit-mesh/docs/repositories/repo-readme-blueprints/campaign-app.md`
 - Applied target: `campaign-app`
 - Source of truth: QNAP Gitea first, GitHub mirror second.
+
+<!-- RIG-CLI:START -->
+## Install The CLI
+
+This repo exposes a standard RIG command so it can be installed, inspected,
+cloned, and routed into future studio/MCP workflows without guessing its
+internal layout.
+
+Install without cloning:
+
+```bash
+curl -fsSL https://github.com/rodgemd1-lgtm/campaign-app/raw/main/install.sh | bash
+```
+
+Install and clone the source-of-truth repo:
+
+```bash
+curl -fsSL https://github.com/rodgemd1-lgtm/campaign-app/raw/main/install.sh | RIG_CLI_CLONE=1 bash
+```
+
+Use it:
+
+```bash
+campaign-app info
+campaign-app capabilities
+campaign-app services
+campaign-app clone
+campaign-app doctor
+```
+
+Clone manually:
+
+```bash
+git clone ssh://git@nas94f2ae.tail4d96b3.ts.net:2222/rig/campaign-app.git
+git clone https://github.com/rodgemd1-lgtm/campaign-app.git
+```
+
+CLI contract:
+
+- Command: `campaign-app`
+- Manifest: `cli/manifest.json`
+- Installer: `install.sh`
+- Source of truth: QNAP Gitea first, GitHub mirror second
+- Standard: [https://github.com/rodgemd1-lgtm/Startup-Intelligence-OS/blob/claude/rig-sovereign-audit-mesh/docs/repositories/repo-cli-standard.md](https://github.com/rodgemd1-lgtm/Startup-Intelligence-OS/blob/claude/rig-sovereign-audit-mesh/docs/repositories/repo-cli-standard.md)
+
+<!-- RIG-CLI:END -->
